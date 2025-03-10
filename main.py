@@ -21,14 +21,13 @@ def get_data():
     return data
 
 def save_to_db(data):
-    query = "INSERT INTO mytable (column1, column2) VALUES (%s, %s)"
+    query = f"INSERT INTO mytable (column1, column2) VALUES ('{data}', 'Another Value')"
     connection = pymysql.connect(**db_config)
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(query, (data, 'Another Value'))
-        connection.commit()
-    finally:
-        connection.close()
+    cursor = connection.cursor()
+    cursor.execute(query)
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 if __name__ == '__main__':
     user_input = get_user_input()
