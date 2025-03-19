@@ -1,100 +1,27 @@
-/**
- * A secure user data processor module
- * @module userProcessor
- */
-
-"use strict";
-
-/**
- * Configuration object with default settings
- * @type {Object}
- */
-const config = {
-  maxNameLength: 50,
-  minAge: 18,
-  maxAge: 120
-};
-
-/**
- * Sanitizes user input by removing potentially dangerous characters
- * @param {string} input - Raw user input
- * @returns {string} Sanitized input string
- */
-function sanitizeInput(input) {
-  if (typeof input !== "string") {
-    return "";
-  }
-  
-  // Remove HTML tags and dangerous characters
-  return input
-    .replace(/<[^>]*>/g, "")
-    .replace(/[&<>"'/]/g, "");
-}
-
-/**
- * Validates user age
- * @param {number} age - User age to validate
- * @returns {boolean} Whether age is valid
- */
-function isValidAge(age) {
-  const numAge = Number(age);
-  
-  if (Number.isNaN(numAge)) {
-    return false;
-  }
-  
-  return numAge >= config.minAge && numAge <= config.maxAge;
-}
-
-/**
- * Processes user data safely
- * @param {Object} userData - User data object
- * @returns {Object} Processed and sanitized user data
- * @throws {Error} If required fields are missing
- */
-function processUserData(userData) {
-  if (!userData || typeof userData !== "object") {
-    throw new Error("Invalid user data provided");
-  }
-  
-  const { name, age, email } = userData;
-  
-  if (!name || !age) {
-    throw new Error("Name and age are required fields");
-  }
-  
-  if (!isValidAge(age)) {
-    throw new Error(`Age must be between ${config.minAge} and ${config.maxAge}`);
-  }
-  
-  // Create sanitized user object
-  const sanitizedUser = {
-    name: sanitizeInput(name).substring(0, config.maxNameLength),
-    age: Number(age),
-    email: email ? sanitizeInput(email) : null,
-    processedDate: new Date().toISOString()
-  };
-  
-  return sanitizedUser;
-}
-
-/**
- * Creates a greeting message for the user
- * @param {Object} userData - Processed user data
- * @returns {string} Personalized greeting
- */
-function createGreeting(userData) {
-  if (!userData || !userData.name) {
-    return "Hello, guest!";
-  }
-  
-  return `Hello, ${userData.name}! Welcome to our service.`;
-}
-
-// Export public API
-module.exports = {
-  processUserData,
-  createGreeting,
-  sanitizeInput,
-  isValidAge
-};
+def save_to_db(data):
+    """
+    Safely save data to database using parameterized queries.
+    
+    Args:
+        data: The data to be inserted into the database
+    """
+    # Define the query with placeholders
+    query = "INSERT INTO mytable (column1, column2) VALUES (%s, %s)"
+    
+    # Connect to database using configuration
+    connection = pymysql.connect(**db_config)
+    
+    try:
+        with connection.cursor() as cursor:
+            # Execute with parameters passed separately from the query
+            cursor.execute(query, (data, 'Another Value'))
+        
+        # Commit the transaction
+        connection.commit()
+    except Exception as e:
+        # Log the error properly
+        logging.error(f"Database error: {e}")
+        connection.rollback()
+    finally:
+        # Always close the connection
+        connection.close()
