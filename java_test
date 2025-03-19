@@ -1,51 +1,100 @@
-package com.example.safeapp;
+/**
+ * A secure user data processor module
+ * @module userProcessor
+ */
 
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+"use strict";
 
 /**
- * A simple and secure Java application example.
+ * Configuration object with default settings
+ * @type {Object}
  */
-public final class SafeExample {
-    private static final Logger LOGGER = Logger.getLogger(SafeExample.class.getName());
-    
-    // Private constructor to prevent instantiation
-    private SafeExample() {
-        // Utility class
-    }
-    
-    /**
-     * Safely processes user input.
-     *
-     * @param input The string to process
-     * @return The sanitized string
-     */
-    public static String processInput(String input) {
-        if (input == null) {
-            return "";
-        }
-        // Sanitize input by removing potentially dangerous characters
-        return input.replaceAll("[<>\"'&]", "");
-    }
-    
-    /**
-     * Main method for the application.
-     *
-     * @param args Command line arguments
-     */
-    public static void main(String[] args) {
-        String userInput = "";
-        
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println("Please enter your name: ");
-            userInput = scanner.nextLine();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error reading input", e);
-            System.exit(1);
-        }
-        
-        String safeInput = processInput(userInput);
-        System.out.println("Hello, " + safeInput + "!");
-    }
+const config = {
+  maxNameLength: 50,
+  minAge: 18,
+  maxAge: 120
+};
+
+/**
+ * Sanitizes user input by removing potentially dangerous characters
+ * @param {string} input - Raw user input
+ * @returns {string} Sanitized input string
+ */
+function sanitizeInput(input) {
+  if (typeof input !== "string") {
+    return "";
+  }
+  
+  // Remove HTML tags and dangerous characters
+  return input
+    .replace(/<[^>]*>/g, "")
+    .replace(/[&<>"'/]/g, "");
 }
+
+/**
+ * Validates user age
+ * @param {number} age - User age to validate
+ * @returns {boolean} Whether age is valid
+ */
+function isValidAge(age) {
+  const numAge = Number(age);
+  
+  if (Number.isNaN(numAge)) {
+    return false;
+  }
+  
+  return numAge >= config.minAge && numAge <= config.maxAge;
+}
+
+/**
+ * Processes user data safely
+ * @param {Object} userData - User data object
+ * @returns {Object} Processed and sanitized user data
+ * @throws {Error} If required fields are missing
+ */
+function processUserData(userData) {
+  if (!userData || typeof userData !== "object") {
+    throw new Error("Invalid user data provided");
+  }
+  
+  const { name, age, email } = userData;
+  
+  if (!name || !age) {
+    throw new Error("Name and age are required fields");
+  }
+  
+  if (!isValidAge(age)) {
+    throw new Error(`Age must be between ${config.minAge} and ${config.maxAge}`);
+  }
+  
+  // Create sanitized user object
+  const sanitizedUser = {
+    name: sanitizeInput(name).substring(0, config.maxNameLength),
+    age: Number(age),
+    email: email ? sanitizeInput(email) : null,
+    processedDate: new Date().toISOString()
+  };
+  
+  return sanitizedUser;
+}
+
+/**
+ * Creates a greeting message for the user
+ * @param {Object} userData - Processed user data
+ * @returns {string} Personalized greeting
+ */
+function createGreeting(userData) {
+  if (!userData || !userData.name) {
+    return "Hello, guest!";
+  }
+  
+  return `Hello, ${userData.name}! Welcome to our service.`;
+}
+
+// Export public API
+module.exports = {
+  processUserData,
+  createGreeting,
+  sanitizeInput,
+  isValidAge
+};
