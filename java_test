@@ -1,0 +1,51 @@
+package com.example.safeapp;
+
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * A simple and secure Java application example.
+ */
+public final class SafeExample {
+    private static final Logger LOGGER = Logger.getLogger(SafeExample.class.getName());
+    
+    // Private constructor to prevent instantiation
+    private SafeExample() {
+        // Utility class
+    }
+    
+    /**
+     * Safely processes user input.
+     *
+     * @param input The string to process
+     * @return The sanitized string
+     */
+    public static String processInput(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Sanitize input by removing potentially dangerous characters
+        return input.replaceAll("[<>\"'&]", "");
+    }
+    
+    /**
+     * Main method for the application.
+     *
+     * @param args Command line arguments
+     */
+    public static void main(String[] args) {
+        String userInput = "";
+        
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("Please enter your name: ");
+            userInput = scanner.nextLine();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error reading input", e);
+            System.exit(1);
+        }
+        
+        String safeInput = processInput(userInput);
+        System.out.println("Hello, " + safeInput + "!");
+    }
+}
